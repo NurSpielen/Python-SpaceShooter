@@ -84,7 +84,7 @@ class Player(GameObject):
         side = 10
         bx = self.x + (self.width / 2) - (side / 2)
         by = self.y
-        if  len(self.bullets) < 2:
+        if len(self.bullets) < 2:
             self.bullets.append(Bullet(bx, by, bullet_speed, side, side, "Bullet"))
 
         # DEBUG
@@ -101,6 +101,7 @@ class Enemy(GameObject):
 
     def __init__(self, x, y, speed, width, height, ID):
         super().__init__(x, y, speed, width, height, ID)
+        self.move_down = True
 
 
 class Bullet(GameObject):
@@ -159,6 +160,7 @@ class GameLogic:
             game_object.render()
 
     @staticmethod
+    # Prevents an object for moving past a certain point in the screen
     def clamp(pos, min, max):
         if pos < min:
             return min
