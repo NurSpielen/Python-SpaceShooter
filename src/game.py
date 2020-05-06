@@ -68,7 +68,7 @@ class GameObject():
             self.y = GameLogic.clamp(self.y, 0, HEIGHT - self.height)
 
     def render(self):
-        pygame.draw.rect(WINDOW, self.color, [self.x, self.y, self.width, self.height])
+        pygame.draw.rect(WINDOW, self.color, [int(self.x), int(self.y), self.width, self.height])
 
 
 class Player(GameObject):
