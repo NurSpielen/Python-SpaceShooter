@@ -73,7 +73,7 @@ class GameObject():
 
 class Player(GameObject):
 
-    # Keeps track of the amount of bullets that the player shot
+    # Keeps track of the amount of bullets in the game
     bullets = []
 
     def __init__(self, x, y, speed, width, height, ID):
@@ -99,10 +99,41 @@ class Player(GameObject):
 # TODO Allow enemies to shoot
 class Enemy(GameObject):
 
+    # Keeps track of all the enemies in gameplay
+    enemies = []
+
     def __init__(self, x, y, speed, width, height, ID):
         super().__init__(x, y, speed, width, height, ID)
-        self.move_down = True
+        Enemy.enemies.append(self)
+        self.can_move_down = False
+        
+    def update(self):
+        self.x += self.speed
+        
+        # This is to prevent the enemy from switching direction when spawned
+        if self.x > WIDTH and not self.can_move_down:
+            self.can_move_down = True
 
+        # Reverses movement direction and lowers enemy position
+        if (self.x + self.width < 0 or self.x > WIDTH) and self.can_move_down:
+            self.speed *= -1
+            self.y += (self.height * 2)
+
+    # Removes enemies that have left the gameplay area
+    @staticmethod
+    def remove_out_of_gameplay_enemies():
+        for enemy in Enemy.enemies:
+            if enemy.y >= (HEIGHT - (enemy.height * 2)):
+                Enemy.remove_enemy(enemy)
+                # DEBUG 
+                # print("Enemy removed")
+
+    # Removes selected enemy from the game
+    @staticmethod
+    def remove_enemy(enemy):
+        Enemy.enemies.remove(enemy)
+        GameObject.objects.remove(enemy)
+        
 
 class Bullet(GameObject):
 
@@ -110,17 +141,37 @@ class Bullet(GameObject):
         super().__init__(x, y, speed, width, height, ID)
         self.move_up = True
 
+    # Verifies if the bullet has hit an enemy and removes both from the game if true
     @staticmethod
-    def remove_player_bullets():
-        # Removes the player bullets from the game
+    def verify_bullet_hit():
+        for bullet in Player.bullets: # Loops through all the bullets
+            for enemy in Enemy.enemies: # Loops through all the enemise
+                # Verifies if the bullet is inside the enemy
+                if bullet.x + bullet.width >= enemy.x and bullet.x <= enemy.x + enemy.width:
+                    if bullet.y <= enemy.y + enemy.height and bullet.y >= enemy.y:
+                        # Removes both the enemy and the bullet
+                        Bullet.remove_bullet(bullet)
+                        Enemy.remove_enemy(enemy)
+
+    # Removes the bullets that have left the gameplay area
+    @staticmethod
+    def remove_out_of_gameplay_bullets():
         for bullet in Player.bullets:
             if bullet.y < 0 - bullet.height: # Bullet has left the screen
-                Player.bullets.remove(bullet)
-                GameObject.objects.remove(bullet)
+                Bullet.remove_bullet(bullet)
+    
+    # Removes the selected bullet from the game
+    @staticmethod
+    def remove_bullet(bullet):
+        Player.bullets.remove(bullet)
+        GameObject.objects.remove(bullet)
     
 
 # Handles all game logic, there is no need to create instances of this class
 class GameLogic:
+
+    # TODO Implement levels
+    # TODO Levels have to spawn the enemies
 
     @staticmethod
     def key_down(event, player):
@@ -151,7 +202,16 @@ class GameLogic:
         for game_object in GameObject.objects:
             game_object.update()
 
-        Bullet.remove_player_bullets()
+        Bullet.remove_out_of_gameplay_bullets()
+        Enemy.remove_out_of_gameplay_enemies()
+        Bullet.verify_bullet_hit()
+
+        # DEBUG
+        if len(Enemy.enemies) == 0:
+            enemy = Enemy(0,0,10,80, 30, "Enemy")
+            enemy = Enemy(-250,0,10,80, 30, "Enemy")
+            enemy = Enemy(-500,0,10,80, 30, "Enemy")
+            enemy = Enemy(-750,0,10,80, 30, "Enemy")
         
     @staticmethod
     def render():
