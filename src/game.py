@@ -167,7 +167,10 @@ class Bullet(GameObject):
         Player.bullets.remove(bullet)
         GameObject.objects.remove(bullet)
     
+    
 class EnemySpawner():
+    # Handles everything related to spawning enemies
+    # Might implement other functionality later on
 
     # TODO have enemies spawn based on a timer
     def __init__(self, clock):
