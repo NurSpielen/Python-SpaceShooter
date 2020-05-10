@@ -166,12 +166,29 @@ class Bullet(GameObject):
         Player.bullets.remove(bullet)
         GameObject.objects.remove(bullet)
     
+class EnemySpawner():
+
+    # TODO have enemies spawn based on a timer
+    def __init__(self, clock):
+        self.level =  0
+        self.clock = clock
+
+    def spawn_enemies(self):
+        self.level += 1
+        enemy_amount = int(2 + (self.level * 1.5))
+        is_valid = False
+        beginning = 0
+        ending = 300
+        for i in range(0, enemy_amount):
+            init_x = -random.randint(beginning, ending)
+            temp = beginning + ending
+            beginning = ending
+            ending = temp
+            Enemy(init_x, 0, 10, 80, 30, "Enemy")
+        
 
 # Handles all game logic, there is no need to create instances of this class
 class GameLogic:
-
-    # TODO Implement levels
-    # TODO Levels have to spawn the enemies
 
     @staticmethod
     def key_down(event, player):
@@ -198,7 +215,11 @@ class GameLogic:
             player.move_down = False
 
     @staticmethod
-    def update():
+    def update(spawner):
+        # DEBUG
+        if len(Enemy.enemies) == 0:
+            spawner.spawn_enemies()
+
         for game_object in GameObject.objects:
             game_object.update()
 
@@ -206,13 +227,6 @@ class GameLogic:
         Enemy.remove_out_of_gameplay_enemies()
         Bullet.verify_bullet_hit()
 
-        # DEBUG
-        if len(Enemy.enemies) == 0:
-            enemy = Enemy(0,0,10,80, 30, "Enemy")
-            enemy = Enemy(-250,0,10,80, 30, "Enemy")
-            enemy = Enemy(-500,0,10,80, 30, "Enemy")
-            enemy = Enemy(-750,0,10,80, 30, "Enemy")
-        
     @staticmethod
     def render():
         WINDOW.fill(BLACK) # Clears the screen
@@ -241,6 +255,8 @@ def main():
     player = Player(px, py, 10, p_size, p_size, "Player")
     clock = pygame.time.Clock()
 
+    spawner = EnemySpawner(clock)
+
     run = True
 
     # Game Loop
@@ -255,7 +271,7 @@ def main():
             if event.type == pygame.KEYUP:
                 GameLogic.key_up(event, player)
 
-        GameLogic.update()
+        GameLogic.update(spawner)
         GameLogic.render()
 
         pygame.display.update()
