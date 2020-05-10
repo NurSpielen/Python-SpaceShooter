@@ -3,6 +3,7 @@ import os
 import pygame
 import random
 import time
+import math
 
 pygame.init()
 
@@ -175,16 +176,14 @@ class EnemySpawner():
 
     def spawn_enemies(self):
         self.level += 1
-        enemy_amount = int(2 + (self.level * 1.5))
-        is_valid = False
+        enemy_amount = 2 + math.ceil(self.level * 1.5)
+        enemy_width = 80
         beginning = 0
-        ending = 300
+        print(enemy_amount)
         for i in range(0, enemy_amount):
-            init_x = -random.randint(beginning, ending)
-            temp = beginning + ending
-            beginning = ending
-            ending = temp
-            Enemy(init_x, 0, 10, 80, 30, "Enemy")
+            init_x = random.randint(beginning, beginning + 300)
+            beginning = init_x + (enemy_width  * 2)
+            Enemy(-init_x, 0, 10, enemy_width, 30, "Enemy")
         
 
 # Handles all game logic, there is no need to create instances of this class
