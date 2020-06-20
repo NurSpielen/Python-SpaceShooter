@@ -3,6 +3,7 @@ import pygame
 
 from colors import Color
 
+
 # Base class for everything in the game
 class GameObject():
 	# Keeps track of all of the game objects

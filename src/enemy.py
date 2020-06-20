@@ -1,6 +1,7 @@
 
 from gameobject import GameObject
 
+
 # TODO Spawn enemies randomly
 # TODO Have enemies pick a color randomly
 # TODO Allow enemies to shoot

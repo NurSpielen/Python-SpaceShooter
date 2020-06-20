@@ -1,6 +1,7 @@
 
 from gameobject import GameObject
 
+
 class Player(GameObject):
     # Keeps track of the amount of bullets in the game
     bullets = []

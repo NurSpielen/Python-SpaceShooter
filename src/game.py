@@ -17,6 +17,7 @@ HEIGHT = 600
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter")
 
+
 # TODO Reformat everything after this
 class EnemySpawner():
     # Handles everything related to spawning enemies
