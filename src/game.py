@@ -2,6 +2,12 @@ import pygame
 import random
 import math
 
+from colors import Color
+from gameobject import GameObject
+from player import Player
+from enemy import Enemy
+from bullet import Bullet
+
 pygame.init()
 
 WIDTH = 800
@@ -10,158 +16,6 @@ HEIGHT = 600
 # Initializing Window
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter")
-
-# Creating Colors
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 186, 0)
-ORANGE = (255, 120, 0)
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-
-
-# Base class for everything in the game
-class GameObject():
-    # Keeps track of all of the game objects
-    objects = []
-
-    def __init__(self, x: int, y: int, speed: int, width: int, height: int, ID: str):
-        self.width = width
-        self.height = height
-        self.x = x
-        self.y = y
-        self.speed = speed
-        self.ID = ID
-        self.color = self.set_color()  # Initializes object color
-        self.move_left = False
-        self.move_right = False
-        self.move_up = False
-        self.move_down = False
-        self.objects.append(self)  # Appends instance to the objects list
-
-    def set_color(self):
-        if self.ID == "Player":
-            return GREEN
-        elif self.ID == "Enemy":
-            return RED
-        elif self.ID == "Bullet":
-            return YELLOW
-        else:
-            return BLUE
-
-    def update(self, dt):
-        if self.move_left:
-            self.x -= self.speed * dt
-        if self.move_right:
-            self.x += self.speed * dt
-        if self.move_up:
-            self.y -= self.speed * dt
-        if self.move_down:
-            self.y += self.speed * dt
-
-        # If the object is the player it will not allow it to go outside of the screen
-        if self.ID == "Player":
-            self.x = GameLogic.clamp(self.x, 0, WIDTH - self.width)
-            self.y = GameLogic.clamp(self.y, 0, HEIGHT - self.height)
-
-    def render(self):
-        pygame.draw.rect(WINDOW, self.color, [int(self.x), int(self.y), self.width, self.height])
-
-
-class Player(GameObject):
-    # Keeps track of the amount of bullets in the game
-    bullets = []
-
-    def __init__(self, x, y, speed, width, height, ID):
-        super().__init__(x, y, speed, width, height, ID)
-
-    def shoot(self):
-        bullet_speed = 300
-        side = 10
-        bx = self.x + (self.width / 2) - (side / 2)
-        by = self.y
-        if len(self.bullets) < 2:
-            self.bullets.append(Bullet(bx, by, bullet_speed, side, side, "Bullet"))
-
-        # DEBUG
-        '''
-        print(f"Player bullets = { len(self.bullets) }")
-        print(f"Game Objects = { len(GameObject.objects) }")
-        '''
-
-
-# TODO Spawn enemies randomly
-# TODO Have enemies pick a color randomly
-# TODO Allow enemies to shoot
-class Enemy(GameObject):
-    # Keeps track of all the enemies in gameplay
-    enemies = []
-
-    def __init__(self, x, y, speed, width, height, ID):
-        super().__init__(x, y, speed, width, height, ID)
-        Enemy.enemies.append(self)
-        self.can_move_down = False
-
-    def update(self, dt):
-        self.x += self.speed * dt
-
-        # This is to prevent the enemy from switching direction when spawned
-        if self.x > WIDTH and not self.can_move_down:
-            self.can_move_down = True
-
-        # Reverses movement direction and lowers enemy position
-        if (self.x + self.width < 0 or self.x > WIDTH) and self.can_move_down:
-            self.speed *= -1
-            self.y += (self.height * 2)
-
-    # Removes enemies that have left the gameplay area
-    @staticmethod
-    def remove_out_of_gameplay_enemies():
-        for enemy in Enemy.enemies:
-            if enemy.y >= (HEIGHT - (enemy.height * 2)):
-                Enemy.remove_enemy(enemy)
-            # DEBUG
-            # print("Enemy removed")
-
-    # Removes selected enemy from the game
-    @staticmethod
-    def remove_enemy(enemy):
-        Enemy.enemies.remove(enemy)
-        GameObject.objects.remove(enemy)
-
-
-class Bullet(GameObject):
-
-    def __init__(self, x, y, speed, width, height, ID):
-        super().__init__(x, y, speed, width, height, ID)
-        self.move_up = True
-
-    # Verifies if the bullet has hit an enemy and removes both from the game if true
-    @staticmethod
-    def verify_bullet_hit():
-        for bullet in Player.bullets:  # Loops through all the bullets
-            for enemy in Enemy.enemies:  # Loops through all the enemise
-                # Verifies if the bullet is inside the enemy
-                if bullet.x + bullet.width >= enemy.x and bullet.x <= enemy.x + enemy.width:
-                    if bullet.y <= enemy.y + enemy.height and bullet.y >= enemy.y:
-                        # Removes both the enemy and the bullet
-                        Bullet.remove_bullet(bullet)
-                        Enemy.remove_enemy(enemy)
-
-    # Removes the bullets that have left the gameplay area
-    @staticmethod
-    def remove_out_of_gameplay_bullets():
-        for bullet in Player.bullets:
-            if bullet.y < 0 - bullet.height:  # Bullet has left the screen
-                Bullet.remove_bullet(bullet)
-
-    # Removes the selected bullet from the game
-    @staticmethod
-    def remove_bullet(bullet):
-        Player.bullets.remove(bullet)
-        GameObject.objects.remove(bullet)
-
 
 # TODO Reformat everything after this
 class EnemySpawner():
@@ -219,7 +73,7 @@ class GameLogic:
             spawner.spawn_enemies()
 
         for game_object in GameObject.objects:
-            game_object.update(dt)
+            game_object.update(dt, WIDTH, HEIGHT)
 
         Bullet.remove_out_of_gameplay_bullets()
         Enemy.remove_out_of_gameplay_enemies()
@@ -227,9 +81,9 @@ class GameLogic:
 
     @staticmethod
     def render() -> None:
-        WINDOW.fill(BLACK)  # Clears the screen
+        WINDOW.fill(Color.BLACK.value)  # Clears the screen
         for game_object in GameObject.objects:
-            game_object.render()
+            game_object.render(WINDOW)
 
     @staticmethod
     def event_handler(player: Player) -> bool:
@@ -242,16 +96,6 @@ class GameLogic:
                 GameLogic.key_up(event, player)
 
         return True
-
-    @staticmethod
-    # Prevents an object for moving past a certain point in the screen
-    def clamp(pos: float, min_val: float, max_val: float) -> float:
-        if pos < min_val:
-            return min_val
-        elif pos > max_val:
-            return max_val
-        else:
-            return pos
 
 
 def main():
