@@ -1,7 +1,5 @@
-import os
 import pygame
 import random
-import time
 import math
 
 pygame.init()
@@ -11,7 +9,7 @@ HEIGHT = 600
 
 # Initializing Window
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption(("Space Shooter"))
+pygame.display.set_caption("Space Shooter")
 
 # Creating Colors
 RED = (255, 0, 0)
