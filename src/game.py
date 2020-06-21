@@ -77,7 +77,7 @@ class GameLogic:
             game_object.update(dt, WIDTH, HEIGHT)
 
         Bullet.remove_out_of_gameplay_bullets()
-        Enemy.remove_out_of_gameplay_enemies()
+        Enemy.remove_out_of_gameplay_enemies(HEIGHT)
         Bullet.verify_bullet_hit()
 
     @staticmethod

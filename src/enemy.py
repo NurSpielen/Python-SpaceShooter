@@ -14,7 +14,7 @@ class Enemy(GameObject):
         Enemy.enemies.append(self)
         self.can_move_down = False
 
-    def update(self, dt):
+    def update(self, dt: float, WIDTH: int, HEIGHT: int):
         self.x += self.speed * dt
 
         # This is to prevent the enemy from switching direction when spawned
@@ -28,7 +28,7 @@ class Enemy(GameObject):
 
     # Removes enemies that have left the gameplay area
     @staticmethod
-    def remove_out_of_gameplay_enemies():
+    def remove_out_of_gameplay_enemies(HEIGHT):
         for enemy in Enemy.enemies:
             if enemy.y >= (HEIGHT - (enemy.height * 2)):
                 Enemy.remove_enemy(enemy)

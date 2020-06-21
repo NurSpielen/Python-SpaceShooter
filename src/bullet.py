@@ -1,5 +1,6 @@
 
 from gameobject import GameObject
+from player import Player
 
 
 class Bullet(GameObject):
